@@ -1,0 +1,280 @@
+import tkinter as tk
+from tkinter import font as tkfont
+import random
+
+class MathGame:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Math Game")
+        self.root.geometry("800x500")
+        self.bg_color = "#e0f7fa"
+        self.text_color = "navy blue"
+        self.button_color = "navy blue"
+        self.highlight_color = "navy blue"
+        self.title_font = tkfont.Font(family="Helvetica", size=20, weight="bold")
+        self.normal_font = tkfont.Font(family="Helvetica", size=14)
+        self.button_font = tkfont.Font(family="Helvetica", size=12, weight="bold")
+
+        self.current_level = 1
+        self.difficulty = {1: "Easy", 2: "Medium", 3: "Hard", 4: "Monkey Brain", 5: "Albert Einstein"}
+        self.time_limit = 30
+        self.max_questions = 50
+
+        self.create_widgets()
+        self.show_splash_screen()
+
+    def create_widgets(self):
+        self.splash_frame = tk.Frame(self.root, bg=self.bg_color)
+        self.splash_label = tk.Label(self.splash_frame, text="Welcome to Math Game!", font=self.title_font, bg=self.bg_color, fg=self.text_color)
+        self.start_button = tk.Button(self.splash_frame, text="Start Game", font=self.button_font, bg=self.button_color, fg="white", command=self.start_countdown)
+
+        self.splash_label.pack(pady=30)
+        self.start_button.pack(pady=20)
+
+        self.game_frame = tk.Frame(self.root, bg=self.bg_color)
+        
+        self.level_label = tk.Label(self.game_frame, text="Level: 1 - Difficulty: " + self.difficulty[self.current_level], font=self.normal_font, bg=self.bg_color, fg=self.text_color)
+        self.question_label = tk.Label(self.game_frame, text="", font=self.normal_font, bg=self.bg_color, fg=self.text_color)
+        self.invalid_input_label = tk.Label(self.game_frame, text="", fg="red", font=self.normal_font, bg=self.bg_color)
+        
+        self.answer_entry = tk.Entry(self.game_frame, font=self.normal_font, bg="#ffffff", fg="black")
+        self.submit_button = tk.Button(self.game_frame, text="Submit/Press Enter", font=self.button_font, bg=self.button_color, fg="white", command=self.submit_answer)
+        self.score_label = tk.Label(self.game_frame, text="Score: 0/10", font=self.normal_font, bg=self.bg_color, fg=self.text_color)
+        self.timer_label = tk.Label(self.game_frame, text="Time left: " + str(self.time_limit), font=self.normal_font, bg=self.bg_color, fg=self.text_color)
+        self.continue_button = tk.Button(self.game_frame, text="Continue to Next Level", font=self.button_font, bg="#0288d1", fg="white", command=self.start_next_level_countdown)
+
+        self.level_label.pack(pady=10)
+        self.question_label.pack(pady=10)
+        self.invalid_input_label.pack_forget()
+        self.answer_entry.pack(pady=10)
+        self.submit_button.pack(pady=15)
+        self.score_label.pack(pady=10)
+        self.timer_label.pack(pady=10)
+
+        self.answer_entry.bind("<Return>", self.submit_answer_event)
+
+    def show_splash_screen(self):
+        self.splash_frame.pack(fill="both", expand=True)
+
+    def hide_splash_screen(self):
+        self.splash_frame.pack_forget()
+
+    def start_countdown(self):
+        self.hide_splash_screen()
+        self.countdown_label = tk.Label(self.root, text="", font=("Helvetica", 60, "bold"), bg=self.bg_color, fg=self.highlight_color)
+        self.countdown_label.pack(fill="both", expand=True)
+        self.countdown(3)
+
+    def countdown(self, count):
+        if count > 0:
+            self.countdown_label.config(text=str(count))
+            self.root.after(1000, self.countdown, count-1)
+        else:
+            self.countdown_label.config(text="GO!")
+            self.root.after(1000, self.start_game)
+
+    def start_game(self):
+        self.countdown_label.pack_forget()
+        self.game_frame.pack(fill="both", expand=True)
+        self.score = 0
+        self.update_score()
+        self.time_limit = 30
+        self.questions_left = self.max_questions
+        self.update_timer()
+        self.answer_entry.config(state=tk.NORMAL)
+        self.submit_button.config(state=tk.NORMAL)
+        self.continue_button.pack_forget()
+        self.answer_entry.bind("<Return>", self.submit_answer_event)
+        self.ask_question()
+
+    def generate_question(self):
+        if self.current_level == 1:
+            x = random.randint(1, 10)
+            y = random.randint(1, 10)
+            operator = "+"
+        elif self.current_level == 2:
+            x = random.randint(10, 25)
+            y = random.randint(10, 15)
+            operator = random.choice(["+", "-"])
+            if operator == "-" and x < y:
+                x, y = y, x
+        elif self.current_level == 3:
+            operator = random.choice(["+", "-", "*"])
+            if operator in ["+", "-"]:
+                x = random.randint(20, 50)
+                y = random.randint(20, 50)
+                if operator == "-" and x < y:
+                    x, y = y, x
+            else:
+                x = random.randint(5, 15)
+                y = random.randint(5, 15)
+                    
+        elif self.current_level == 4:
+            operator = random.choice(["+", "-", "*", "/"])
+            if operator == "+" or operator == "-":
+                x = random.randint(20, 75)
+                y = random.randint(20, 75)
+                if operator == "-" and x < y:
+                    x, y = y, x
+            elif operator == "*":
+                x = random.randint(10, 20)
+                y = random.randint(10, 20)
+            elif operator == "/":
+                y = random.randint(5, 50)
+                x = y * random.randint(1, 15)
+        elif self.current_level == 5:
+            operator = random.choice(["+", "-", "*", "/"])
+            if operator == "+" or operator == "-":
+                x = random.randint(50, 100)
+                y = random.randint(20, 100)
+                if operator == "-" and x < y:
+                    x, y = y, x
+            elif operator == "*":
+                x = random.randint(15, 25)
+                y = random.randint(15, 25)
+            elif operator == "/":
+                y = random.randint(20, 50)
+                x = y * random.randint(5, 25)                
+        question = str(x) + " " + operator + " " + str(y)
+        if operator == "/":
+            answer = x / y
+        else:
+            answer = eval(question)
+        return question, round(answer, 2)
+
+    def ask_question(self):
+        if self.questions_left > 0 and self.score < 10:
+            self.questions_left -= 1
+            self.question, self.correct_answer = self.generate_question()
+            self.question_label.config(text="Question: " + self.question, fg=self.text_color)
+            self.invalid_input_label.pack_forget()
+            self.answer_entry.delete(0, tk.END)
+            self.answer_entry.focus()
+            self.answer_entry.config(state=tk.NORMAL)
+            self.submit_button.config(state=tk.NORMAL)
+            self.answer_entry.bind("<Return>", self.submit_answer_event)
+        else:
+            self.check_score_and_continue()
+
+    def submit_answer_event(self, event):
+        self.submit_answer()
+
+    def submit_answer(self):
+        user_answer = self.answer_entry.get()
+        self.clear()
+        self.answer_entry.config(state=tk.DISABLED)
+        self.submit_button.config(state=tk.DISABLED)
+        self.answer_entry.unbind("<Return>")
+
+        try:
+            user_answer = float(user_answer)
+            if round(user_answer, 2) == self.correct_answer:
+                self.score += 1
+                self.question_label.config(fg="green")
+                self.invalid_input_label.pack_forget()
+            else:
+                self.question_label.config(fg="red")
+                self.invalid_input_label.pack_forget()
+            self.update_score()
+        except ValueError:
+            self.invalid_input_label.config(text="Invalid input! Please enter a number.")
+            self.invalid_input_label.pack()
+            self.answer_entry.delete(0, tk.END)
+            self.answer_entry.config(state=tk.NORMAL)
+            self.submit_button.config(state=tk.NORMAL)
+            self.answer_entry.bind("<Return>", self.submit_answer_event)
+            return
+
+        if self.time_limit <= 0:
+            self.check_score_and_continue()
+        else:
+            self.root.after(500, self.ask_question)
+
+    def update_score(self):
+        self.score_label.config(text="Score: " + str(self.score) + "/10")
+
+    def update_timer(self):
+        if self.time_limit > 0:
+            self.timer_label.config(text="Time left: " + str(self.time_limit))
+            self.time_limit -= 1
+            self.timer = self.root.after(1000, self.update_timer)
+        else:
+            self.root.after_cancel(self.timer)
+            self.check_score_and_continue()
+
+    def check_score_and_continue(self):
+        self.answer_entry.config(state=tk.DISABLED)
+        self.submit_button.config(state=tk.DISABLED)
+        self.answer_entry.unbind("<Return>")
+        if self.score >= 10:
+            if self.current_level == 5:
+                self.congratulate_and_offer_restart()
+            else:
+                self.congratulate_and_ask_next_level()
+        else:
+            self.level_failed()
+
+    def start_next_level_countdown(self):
+        self.current_level += 1
+        if self.current_level <= 5:
+            self.level_label.config(text="Level: " + str(self.current_level) + " - Difficulty: " + self.difficulty[self.current_level])
+            self.time_limit = 30
+            self.questions_left = self.max_questions
+            self.answer_entry.config(state=tk.DISABLED)
+            self.submit_button.config(state=tk.DISABLED)
+            self.answer_entry.unbind("<Return>")
+            self.start_countdown()
+        self.answer_entry.config(state=tk.DISABLED)
+        self.submit_button.config(state=tk.DISABLED)
+        self.continue_button.pack_forget()
+
+    def congratulate_and_ask_next_level(self):
+        self.question_label.config(text=f"Congratulations! You've completed Level {self.current_level}.", fg=self.highlight_color)
+        self.answer_entry.config(state=tk.DISABLED)
+        self.submit_button.config(state=tk.DISABLED)
+        self.root.after_cancel(self.timer)
+        self.continue_button.pack(pady=20)
+
+    def congratulate_and_offer_restart(self):
+        self.question_label.config(text=f"Congratulations! You've completed all levels!", fg=self.highlight_color)
+        self.answer_entry.config(state=tk.DISABLED)
+        self.submit_button.config(state=tk.DISABLED)
+        self.root.after_cancel(self.timer)
+        self.restart_button = tk.Button(self.game_frame, text="Play Again", font=self.button_font, bg=self.button_color, fg="white", command=self.restart_game)
+        self.restart_button.pack(pady=20)
+
+    def level_failed(self):
+        self.question_label.config(text=f"Level {self.current_level} Failed! You needed 10 points.", fg="red")
+        self.answer_entry.config(state=tk.DISABLED)
+        self.submit_button.config(state=tk.DISABLED)
+        self.root.after_cancel(self.timer)
+        self.retry_button = tk.Button(self.game_frame, text="Retry Level", font=self.button_font, bg="#F44336", fg="white", command=self.retry_countdown)
+        self.retry_button.pack(pady=20)
+
+    def retry_countdown(self):
+        self.retry_button.pack_forget()
+        self.countdown_label = tk.Label(self.root, text="", font=("Helvetica", 60, "bold"), bg=self.bg_color, fg=self.highlight_color)
+        self.countdown_label.pack(fill="both", expand=True)
+        self.countdown(3)
+
+    def restart_countdown(self):
+        self.restart_button.pack_forget()
+        self.countdown_label = tk.Label(self.root, text="", font=("Helvetica", 60, "bold"), bg=self.bg_color, fg=self.highlight_color)
+        self.countdown_label.pack(fill="both", expand=True)
+        self.countdown(3)
+
+    def restart_game(self):
+        self.current_level = 1
+        self.level_label.config(text="Level: " + str(self.current_level) + " - Difficulty: " + self.difficulty[self.current_level])
+        self.score = 0
+        self.update_score()
+        self.restart_countdown()
+
+    def clear(self):
+        self.answer_entry.delete(0, tk.END)
+
+root = tk.Tk()
+game = MathGame(root)
+root.mainloop()
+
+
