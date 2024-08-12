@@ -1,0 +1,126 @@
+import tkinter as tk
+import random
+import time
+
+class MathGame:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Math Game")
+        self.root.geometry("400x300")
+        self.root.configure(bg="light blue")  # Set background color
+        
+        self.current_level = 1
+        self.difficulty = {1: "Crocodile", 2: "Horse", 3: "Dog", 4: "Chimpanzee", 5: "Albert Einstein"}
+        self.time_limit = 30
+        self.num_questions = {1: 10, 2: 15, 3: 20, 4: 25, 5: 30}
+        
+        self.level_label = tk.Label(root, text="Level: " + self.difficulty[self.current_level], bg="light blue", fg="dark blue")
+        self.level_label.pack()
+        
+        self.question_label = tk.Label(root, text="", bg="light blue", fg="dark blue")
+        self.question_label.pack()
+        
+        self.answer_entry = tk.Entry(root, fg="black")
+        self.answer_entry.pack()
+        
+        self.submit_button = tk.Button(root, text="Submit", command=self.submit_answer, fg="white", bg="dark blue")
+        self.submit_button.pack()
+        
+        self.score_label = tk.Label(root, text="Score: 0", bg="light blue", fg="dark blue")
+        self.score_label.pack()
+        
+        self.timer_label = tk.Label(root, text="Time left: " + str(self.time_limit), bg="light blue", fg="dark blue")
+        self.timer_label.pack()
+        
+        self.start_game()
+
+    def generate_question(self):
+        if self.current_level == 1:
+            x = random.randint(1, 10)
+            y = random.randint(1, 10)
+            operator = "+"
+        elif self.current_level == 2:
+            x = random.randint(1, 20)
+            y = random.randint(1, 20)
+            operator = random.choice(["+", "-"])
+        elif self.current_level == 3:
+            x = random.randint(1, 10)
+            y = random.randint(1, 10)
+            operator = random.choice(["+", "-", "*"])
+        elif self.current_level == 4:
+            x = random.randint(1, 100)
+            y = random.randint(1, 10)
+            operator = random.choice(["+", "-", "*", "/"])
+        elif self.current_level == 5:
+            x = random.randint(1, 10)
+            y = random.randint(1, 3)
+            operator = random.choice(["+", "-", "*", "/", "**"])
+        
+        question = str(x) + " " + operator + " " + str(y)
+        if operator == "/":
+            answer = x / y
+        elif operator == "**":
+            answer = x ** y
+        else:
+            answer = eval(question)
+        return question, round(answer, 2)
+
+    def start_game(self):
+        self.score = 0
+        self.questions_left = self.num_questions[self.current_level]
+        self.update_score()
+        self.time_limit = 30
+        self.update_timer()
+        self.ask_question()
+
+    def ask_question(self):
+        if self.questions_left > 0:
+            self.questions_left -= 1
+            self.question, self.correct_answer = self.generate_question()
+            self.question_label.config(text="Question: " + self.question)
+            self.answer_entry.delete(0, tk.END)
+            self.answer_entry.focus()
+        else:
+            self.level_up()
+
+    def submit_answer(self):
+        user_answer = self.answer_entry.get()
+        try:
+            user_answer = float(user_answer)
+            if round(user_answer, 2) == self.correct_answer:
+                self.score += 1
+            self.update_score()
+            self.ask_question()
+        except ValueError:
+            self.question_label.config(text="Invalid input! Please enter a number.")
+            self.answer_entry.delete(0, tk.END)
+
+    def update_score(self):
+        self.score_label.config(text="Score: " + str(self.score))
+
+    def update_timer(self):
+        self.timer_label.config(text="Time left: " + str(self.time_limit))
+        if self.time_limit > 0:
+            self.time_limit -= 1
+            self.root.after(1000, self.update_timer)
+        else:
+            self.level_up()
+
+    def level_up(self):
+        self.current_level += 1
+        if self.current_level <= 5:
+            self.level_label.config(text="Level: " + self.difficulty[self.current_level])
+            self.time_limit = 30
+            self.questions_left = self.num_questions[self.current_level]
+            self.start_game()
+        else:
+            self.game_over()
+
+    def game_over(self):
+        self.question_label.config(text="Game Over!")
+        self.answer_entry.config(state=tk.DISABLED)
+        self.submit_button.config(state=tk.DISABLED)
+
+root = tk.Tk()
+game = MathGame(root)
+root.mainloop()
