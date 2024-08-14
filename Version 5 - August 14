@@ -1,3 +1,4 @@
+"""This program is a simple math game designed for students to improve their basic math skills"""
 # Import required libraries
 import tkinter as tk
 from tkinter import font as tkfont
@@ -21,6 +22,7 @@ _B = 'white'  # Text color for buttons
 _A = True  # Boolean for True
 
 class MathGame:
+    """This class creates my main functions and widgets for my math game"""
     def __init__(self, root):
         # Initialize game settings
         A = 'navy blue'  # Background color for text and buttons
