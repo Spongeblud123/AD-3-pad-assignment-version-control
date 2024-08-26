@@ -1,66 +1,72 @@
 """This program is a simple math game designed for students to improve their basic math skills"""
-# Import required libraries
+
 import tkinter as tk
 from tkinter import font as tkfont
 import random
 from tkinter import messagebox
 import os
 
-# Define global constants
-_M = ' - Difficulty: '
-_L = 'Level: '
-_K = '#0288d1'  # Button color for the game
-_J = 'Time left: '
-_I = 'bottom'  # Position for the image
-_H = 'red'  # Color for error messages
-_G = 'credentials.txt'  # File for storing user credentials
-_F = 'bold'  # Font weight
-_E = 'both'  # Packing option
-_D = 'Helvetica'  # Font family
-_C = '<Return>'  # Key for pressing Enter
-_B = 'white'  # Text color for buttons
-_A = True  # Boolean for True
 
-class MathGame:
-    """This class creates my main functions and widgets for my math game"""
+MAX_QUESTIONS = 50  # Maximum number of questions per level
+TIME_LIMIT = 30  # Time limit for each question
+
+class User:
+    """Class to handle user-related information"""
+    def __init__(self, username):
+        self.username = username
+        self.score = 0
+    
+    def reset_score(self):
+        self.score = 0
+    
+    def increment_score(self):
+        self.score += 1
+
+
+class NumberRush:
+    """Class to handle the main functions and widgets for the math game"""
     def __init__(self, root):
-        # Initialize game settings
-        A = 'navy blue'  # Background color for text and buttons
         self.root = root
         self.root.title('Number Rush')  # Set window title
         self.root.geometry('1000x700')  # Set window size
-        self.bg_colour = '#e0f7fa'  # Background color for the game
-        self.text_colour = A
-        self.button_colour = A
-        self.highlight_colour = A
+
         # Define font styles
-        self.title_text = tkfont.Font(family=_D, size=20, weight=_F)
-        self.normal_font = tkfont.Font(family=_D, size=14)
-        self.button_font = tkfont.Font(family=_D, size=12, weight=_F)
+        self.title_text = tkfont.Font(family='Helvetica', size=20, weight='bold')
+        self.normal_font = tkfont.Font(family='Helvetica', size=14)
+        self.button_font = tkfont.Font(family='Helvetica', size=12, weight='bold')
+
         # Initialize game variables
         self.current_level = 1
         self.difficulty = {1: 'Easy', 2: 'Medium', 3: 'Hard', 4: 'Monkey Brain', 5: 'Albert Einstein'}
-        self.time_limit = 30  # Time limit for each question
-        self.max_questions = 50  # Maximum number of questions per level
-        self.login_screen()  # Display the login screen
+        self.time_limit = TIME_LIMIT  # Time limit for each question
+        self.questions_left = MAX_QUESTIONS  # Questions remaining in the level
+       
 
-    def create_widgets(self):
+        # Initialize user
+        self.user = None
+
+        # Display the login screen
+        self.login_page()
+
+    def game_buttons(self):
         # Create widgets for the splash screen
-        self.splash_frame = tk.Frame(self.root, bg=self.bg_colour)
-        self.splash_label = tk.Label(self.splash_frame, text='Welcome to Number Rush!', font=self.title_text, bg=self.bg_colour, fg=self.text_colour)
-        self.start_button = tk.Button(self.splash_frame, text='Press Play To Begin', font=self.button_font, bg=self.button_colour, fg=_B, command=self.start_countdown)
+        self.splash_frame = tk.Frame(self.root, bg='#e0f7fa')
+        self.splash_label = tk.Label(self.splash_frame, text=f'Welcome {self.user.username} to Number Rush!', font=self.title_text, bg='#e0f7fa', fg='navy blue')
+        self.start_button = tk.Button(self.splash_frame, text='Press Play To Begin', font=self.button_font, bg='navy blue', fg='white', command=self.start_countdown)
         self.splash_label.pack(pady=30)  # Add welcome label
         self.start_button.pack(pady=20)  # Add start button
+
         # Create widgets for the game screen
-        self.game_frame = tk.Frame(self.root, bg=self.bg_colour)
-        self.level_label = tk.Label(self.game_frame, text='Level: 1 - Difficulty: ' + self.difficulty[self.current_level], font=self.normal_font, bg=self.bg_colour, fg=self.text_colour)
-        self.question_label = tk.Label(self.game_frame, text='', font=self.normal_font, bg=self.bg_colour, fg=self.text_colour)
-        self.invalid_input_label = tk.Label(self.game_frame, text='', fg=_H, font=self.normal_font, bg=self.bg_colour)
+        self.game_frame = tk.Frame(self.root, bg='#e0f7fa')
+        self.level_label = tk.Label(self.game_frame, text='Level: 1 - Difficulty: ' + self.difficulty[self.current_level], font=self.normal_font, bg='#e0f7fa', fg='navy blue')
+        self.question_label = tk.Label(self.game_frame, text='', font=self.normal_font, bg='#e0f7fa', fg='navy blue')
+        self.invalid_input_label = tk.Label(self.game_frame, text='', fg='red', font=self.normal_font, bg='#e0f7fa')
         self.answer_entry = tk.Entry(self.game_frame, font=self.normal_font, bg='#ffffff', fg='black')
-        self.submit_button = tk.Button(self.game_frame, text='Submit/Press Enter', font=self.button_font, bg=self.button_colour, fg=_B, command=self.submit_answer)
-        self.score_label = tk.Label(self.game_frame, text='Score: 0/10', font=self.normal_font, bg=self.bg_colour, fg=self.text_colour)
-        self.timer_label = tk.Label(self.game_frame, text=_J + str(self.time_limit), font=self.normal_font, bg=self.bg_colour, fg=self.text_colour)
-        self.continue_button = tk.Button(self.game_frame, text='Next Level', font=self.button_font, bg=_K, fg=_B, command=self.start_next_level_countdown)
+        self.submit_button = tk.Button(self.game_frame, text='Submit/Press Enter', font=self.button_font, bg='navy blue', fg='white', command=self.submit_answer)
+        self.score_label = tk.Label(self.game_frame, text=f'Score: {self.user.score}/10', font=self.normal_font, bg='#e0f7fa', fg='navy blue')
+        self.timer_label = tk.Label(self.game_frame, text='Time left: ' + str(self.time_limit), font=self.normal_font, bg='#e0f7fa', fg='navy blue')
+        self.continue_button = tk.Button(self.game_frame, text='Next Level', font=self.button_font, bg='#0288d1', fg='white', command=self.start_next_level_countdown)
+
         # Pack widgets on the game screen
         self.level_label.pack(pady=10)
         self.question_label.pack(pady=10)
@@ -69,27 +75,26 @@ class MathGame:
         self.submit_button.pack(pady=15)
         self.score_label.pack(pady=10)
         self.timer_label.pack(pady=10)
-        self.answer_entry.bind(_C, self.submit_answer_event)
-        # Load and display image
-        try:
-            self.image = tk.PhotoImage(file='SpongeBob.png')
-            self.image_label = tk.Label(self.game_frame, image=self.image, bg=self.bg_colour)
-            self.image_label.pack(side=_I, pady=20)
-        except Exception as e:
-            print('Error loading image:', e)
-            self.image_label = None
-        self.show_splash_screen()  # Show splash screen
+        self.answer_entry.bind('<Return>', self.submit_answer_event)
 
-    def login_screen(self):
+        # Load and display image
+        self.image = tk.PhotoImage(file='SpongeBob.png')
+        self.image_label = tk.Label(self.game_frame, image=self.image, bg='#e0f7fa')
+        self.image_label.pack(side='bottom', pady=20)
+
+        self.splash_screen()  # Show splash screen
+
+    def login_page(self):
         # Create widgets for the login screen
-        self.login_frame = tk.Frame(self.root, bg=self.bg_colour)
-        self.login_title = tk.Label(self.login_frame, text='Welcome, please login', font=self.title_text, bg=self.bg_colour, fg=self.text_colour)
-        self.username_label = tk.Label(self.login_frame, text='Username:', font=self.normal_font, bg=self.bg_colour, fg=self.text_colour)
-        self.username_entry = tk.Entry(self.login_frame, font=self.normal_font)
-        self.password_label = tk.Label(self.login_frame, text='Password:', font=self.normal_font, bg=self.bg_colour, fg=self.text_colour)
-        self.password_entry = tk.Entry(self.login_frame, show='*', font=self.normal_font)
-        self.login_button = tk.Button(self.login_frame, text='Login', font=self.button_font, bg=self.button_colour, fg=_B, command=self.login)
-        self.create_account_button = tk.Button(self.login_frame, text='Create Account', font=self.button_font, bg=_K, fg=_B, command=self.create_account)
+        self.login_box = tk.Frame(self.root, bg='#e0f7fa')
+        self.login_title = tk.Label(self.login_box, text='Welcome, please login', font=self.title_text, bg='#e0f7fa', fg='navy blue')
+        self.username_label = tk.Label(self.login_box, text='Username:', font=self.normal_font, bg='#e0f7fa', fg='navy blue')
+        self.username_entry = tk.Entry(self.login_box, font=self.normal_font)
+        self.password_label = tk.Label(self.login_box, text='Password:', font=self.normal_font, bg='#e0f7fa', fg='navy blue')
+        self.password_entry = tk.Entry(self.login_box, show='*', font=self.normal_font)
+        self.login_button = tk.Button(self.login_box, text='Login', font=self.button_font, bg='navy blue', fg='white', command=self.login)
+        self.create_account_button = tk.Button(self.login_box, text='Create Account', font=self.button_font, bg='#0288d1', fg='white', command=self.create_account)
+
         # Pack widgets on the login screen
         self.login_title.pack(pady=20)
         self.username_label.pack(pady=5)
@@ -98,21 +103,21 @@ class MathGame:
         self.password_entry.pack(pady=5)
         self.login_button.pack(pady=10)
         self.create_account_button.pack(pady=10)
-        self.login_frame.pack(fill=_E, expand=_A)  # Fill and expand the login frame
+        self.login_box.pack(fill='both', expand=True)  # Fill and expand the login frame
 
-    def show_splash_screen(self):
+    def splash_screen(self):
         # Display the splash screen
-        self.splash_frame.pack(fill=_E, expand=_A)
+        self.splash_frame.pack(fill='both', expand=True)
 
-    def hide_splash_screen(self):
+    def remove_splash_screen(self):
         # Hide the splash screen
         self.splash_frame.pack_forget()
 
     def start_countdown(self):
         # Hide splash screen and start countdown
-        self.hide_splash_screen()
-        self.countdown_label = tk.Label(self.root, text='', font=(_D, 60, _F), bg=self.bg_colour, fg=self.highlight_colour)
-        self.countdown_label.pack(fill=_E, expand=_A)
+        self.remove_splash_screen()
+        self.countdown_label = tk.Label(self.root, text='', font=('Helvetica', 60, 'bold'), bg='#e0f7fa', fg='navy blue')
+        self.countdown_label.pack(fill='both', expand=True)
         self.countdown(3)  # Start countdown from 3
 
     def countdown(self, count):
@@ -127,90 +132,88 @@ class MathGame:
     def start_game(self):
         # Start the game
         self.countdown_label.pack_forget()
-        self.game_frame.pack(fill=_E, expand=_A)
-        self.score = 0
-        self.update_score()  # Reset score
-        self.time_limit = 30  # Reset time limit
-        self.questions_left = self.max_questions  # Reset questions count
+        self.game_frame.pack(fill='both', expand=True)
+        self.user.reset_score()  # Reset score
+        self.update_score()  # Update score display
+        self.time_limit = TIME_LIMIT  # Reset time limit
+        self.questions_left = MAX_QUESTIONS  # Reset questions count
         self.update_timer()  # Start timer
         self.answer_entry.config(state=tk.NORMAL)
         self.submit_button.config(state=tk.NORMAL)
         self.continue_button.pack_forget()  # Hide continue button
-        self.answer_entry.bind(_C, self.submit_answer_event)  # Bind Enter key to submit answer
-        self.ask_question()  # Ask first question
+        self.answer_entry.bind('<Return>', self.submit_answer_event)  # Bind Enter key to submit answer
+        self.question_asker()  # Ask first question
         if self.image_label:
-            self.image_label.pack(side=_I, pady=20)  # Display image if available
+            self.image_label.pack(side='bottom', pady=20)  # Display image if available
 
     def generate_question(self):
         # Generate a random question based on the current level
-        C = '/'
-        B = '+'
-        A = '-'
         if self.current_level == 1:
             x = random.randint(1, 10)
             y = random.randint(1, 10)
-            operator = B
+            operator = '+'
         elif self.current_level == 2:
             x = random.randint(10, 25)
             y = random.randint(10, 15)
-            operator = random.choice([B, A])
-            if operator == A and x < y:
+            operator = random.choice(['+', '-'])
+            if operator == '-' and x < y:
                 x, y = y, x  # Swap x and y for subtraction
         elif self.current_level == 3:
-            operator = random.choice([B, A, '*'])
-            if operator in [B, A]:
+            operator = random.choice(['+', '-', '*'])
+            if operator in ['+', '-']:
                 x = random.randint(20, 50)
                 y = random.randint(20, 50)
-                if operator == A and x < y:
+                if operator == '-' and x < y:
                     x, y = y, x  # Swap x and y for subtraction
             else:
                 x = random.randint(5, 15)
                 y = random.randint(5, 15)
         elif self.current_level == 4:
-            operator = random.choice([B, A, '*', C])
-            if operator == B or operator == A:
+            operator = random.choice(['+', '-', '*', '/'])
+            if operator == '+' or operator == '-':
                 x = random.randint(20, 75)
                 y = random.randint(20, 75)
-                if operator == A and x < y:
+                if operator == '-' and x < y:
                     x, y = y, x  # Swap x and y for subtraction
             elif operator == '*':
                 x = random.randint(10, 20)
                 y = random.randint(10, 20)
-            elif operator == C:
+            elif operator == '/':
                 y = random.randint(5, 50)
                 x = y * random.randint(1, 15)  # Generate division question
         elif self.current_level == 5:
-            operator = random.choice([B, A, '*', C])
-            if operator == B or operator == A:
+            operator = random.choice(['+', '-', '*', '/'])
+            if operator == '+' or operator == '-':
                 x = random.randint(50, 100)
                 y = random.randint(20, 100)
-                if operator == A and x < y:
+                if operator == '-' and x < y:
                     x, y = y, x  # Swap x and y for subtraction
             elif operator == '*':
                 x = random.randint(15, 25)
                 y = random.randint(15, 25)
-            elif operator == C:
+            elif operator == '/':
                 y = random.randint(20, 50)
                 x = y * random.randint(5, 25)  # Generate division question
+
         question = str(x) + ' ' + operator + ' ' + str(y)
-        if operator == C:
+        if operator == '/':
             answer = x / y
         else:
             answer = eval(question)
         return question, round(answer, 2)  # Return question and answer
 
-    def ask_question(self):
+    def question_asker(self):
         # Display a question to the user
-        if self.questions_left > 0 and self.score < 10:
+        if self.questions_left > 0 and self.user.score < 10:
             self.questions_left -= 1
             self.question, self.correct_answer = self.generate_question()
-            self.question_label.config(text='Question: ' + self.question, fg=self.text_colour)
+            self.question_label.config(text='Question: ' + self.question, fg='navy blue')
             self.invalid_input_label.pack_forget()
             self.answer_entry.delete(0, tk.END)
             self.answer_entry.focus()
             self.answer_entry.config(state=tk.NORMAL)
             self.submit_button.config(state=tk.NORMAL)
-            self.answer_entry.bind(_C, self.submit_answer_event)
+            self.answer_entry.bind('<Return>', self.submit_answer_event)
         else:
             self.check_score_and_continue()  # Check score and decide next step
 
@@ -224,15 +227,15 @@ class MathGame:
         self.clear()  # Clear entry field
         self.answer_entry.config(state=tk.DISABLED)
         self.submit_button.config(state=tk.DISABLED)
-        self.answer_entry.unbind(_C)  # Unbind Enter key
+        self.answer_entry.unbind('<Return>')  # Unbind Enter key
         try:
             user_answer = float(user_answer)
             if round(user_answer, 2) == self.correct_answer:
-                self.score += 1
+                self.user.increment_score()
                 self.question_label.config(fg='green')  # Correct answer
                 self.invalid_input_label.pack_forget()
             else:
-                self.question_label.config(fg=_H)  # Incorrect answer
+                self.question_label.config(fg='red')  # Incorrect answer
                 self.invalid_input_label.pack_forget()
             self.update_score()  # Update score display
         except ValueError:
@@ -241,21 +244,21 @@ class MathGame:
             self.answer_entry.delete(0, tk.END)
             self.answer_entry.config(state=tk.NORMAL)
             self.submit_button.config(state=tk.NORMAL)
-            self.answer_entry.bind(_C, self.submit_answer_event)
+            self.answer_entry.bind('<Return>', self.submit_answer_event)
             return
         if self.time_limit <= 0:
             self.check_score_and_continue()  # Check score if time is up
         else:
-            self.root.after(500, self.ask_question)  # Ask another question after delay
+            self.root.after(500, self.question_asker)  # Ask another question after delay
 
     def update_score(self):
         # Update score display
-        self.score_label.config(text='Score: ' + str(self.score) + '/10')
+        self.score_label.config(text=f'Score: {self.user.score}/10')
 
     def update_timer(self):
         # Update timer display
         if self.time_limit > 0:
-            self.timer_label.config(text=_J + str(self.time_limit))
+            self.timer_label.config(text='Time left: ' + str(self.time_limit))
             self.time_limit -= 1
             self.timer = self.root.after(1000, self.update_timer)  # Update timer every second
         else:
@@ -266,8 +269,8 @@ class MathGame:
         # Check the score and proceed based on the result
         self.answer_entry.config(state=tk.DISABLED)
         self.submit_button.config(state=tk.DISABLED)
-        self.answer_entry.unbind(_C)
-        if self.score >= 10:
+        self.answer_entry.unbind('<Return>')
+        if self.user.score >= 10:
             if self.current_level == 5:
                 self.congratulate_and_offer_restart()  # End game and offer restart
             else:
@@ -281,24 +284,24 @@ class MathGame:
             self.welcome_back_frame.pack_forget()
         self.current_level += 1
         if self.current_level <= 5:
-            self.level_label.config(text=_L + str(self.current_level) + _M + self.difficulty[self.current_level])
+            self.level_label.config(text='Level: ' + str(self.current_level) + ' - Difficulty: ' + self.difficulty[self.current_level])
             self.time_limit = 30
-            self.questions_left = self.max_questions
+            self.questions_left = MAX_QUESTIONS
             self.answer_entry.config(state=tk.DISABLED)
             self.submit_button.config(state=tk.DISABLED)
-            self.answer_entry.unbind(_C)
+            self.answer_entry.unbind('<Return>')
             if self.image_label:
                 self.image_label.pack_forget()  # Hide image
             self.start_countdown()  # Start countdown for the next level
             if self.image_label:
-                self.image_label.pack(side=_I, pady=20)  # Show image again
+                self.image_label.pack(side='bottom', pady=20)  # Show image again
         else:
             self.congratulate_and_offer_restart()  # End game if all levels are completed
         self.continue_button.pack_forget()  # Hide continue button
 
     def congratulate_and_ask_next_level(self):
         # Congratulate the player and ask to proceed to the next level
-        self.question_label.config(fg=self.highlight_colour, text=f"Congratulations! You've completed Level {self.current_level}.")
+        self.question_label.config(fg='navy blue', text=f"Congratulations! You've completed Level {self.current_level}.")
         self.answer_entry.config(state=tk.DISABLED)
         self.submit_button.config(state=tk.DISABLED)
         self.root.after_cancel(self.timer)
@@ -306,42 +309,42 @@ class MathGame:
 
     def congratulate_and_offer_restart(self):
         # Congratulate the player and offer to restart the game
-        self.question_label.config(fg=self.highlight_colour, text="Congratulations! You've completed all levels!")
+        self.question_label.config(fg='navy blue', text="Congratulations! You've completed all levels!")
         self.answer_entry.config(state=tk.DISABLED)
         self.submit_button.config(state=tk.DISABLED)
         self.root.after_cancel(self.timer)
-        self.restart_button = tk.Button(self.game_frame, text='Play Again', font=self.button_font, bg=self.button_colour, fg=_B, command=self.restart_game)
+        self.restart_button = tk.Button(self.game_frame, text='Play Again', font=self.button_font, bg='navy blue', fg='white', command=self.restart_game)
         self.restart_button.pack(pady=20)  # Show restart button
 
     def level_failed(self):
         # Display failure message and offer to retry the level
-        self.question_label.config(fg=_H, text=f"Level {self.current_level} Failed! You needed 10 points.")
+        self.question_label.config(fg='red', text=f"Level {self.current_level} Failed! You needed 10 points.")
         self.answer_entry.config(state=tk.DISABLED)
         self.submit_button.config(state=tk.DISABLED)
         self.root.after_cancel(self.timer)
-        self.retry_button = tk.Button(self.game_frame, text='Retry Level', font=self.button_font, bg='#F44336', fg=_B, command=self.retry_countdown)
+        self.retry_button = tk.Button(self.game_frame, text='Retry Level', font=self.button_font, bg='#F44336', fg='white', command=self.retry_countdown)
         self.retry_button.pack(pady=20)  # Show retry button
 
     def retry_countdown(self):
         # Start countdown for retrying the level
         self.retry_button.pack_forget()
-        self.countdown_label = tk.Label(self.root, text='', font=(_D, 60, _F), bg=self.bg_colour, fg=self.highlight_colour)
-        self.countdown_label.pack(fill=_E, expand=_A)
+        self.countdown_label = tk.Label(self.root, text='', font=('Helvetica', 60, 'bold'), bg='#e0f7fa', fg='navy blue')
+        self.countdown_label.pack(fill='both', expand=True)
         self.countdown(3)  # Countdown for retry
 
     def restart_countdown(self):
         # Start countdown for restarting the game
         self.restart_button.pack_forget()
-        self.countdown_label = tk.Label(self.root, text='', font=(_D, 60, _F), bg=self.bg_colour, fg=self.highlight_colour)
-        self.countdown_label.pack(fill=_E, expand=_A)
+        self.countdown_label = tk.Label(self.root, text='', font=('Helvetica', 60, 'bold'), bg='#e0f7fa', fg='navy blue')
+        self.countdown_label.pack(fill='both', expand=True)
         self.countdown(3)  # Countdown for restart
 
     def restart_game(self):
         # Restart the game
         self.current_level = 1
-        self.level_label.config(text=_L + str(self.current_level) + _M + self.difficulty[self.current_level])
-        self.score = 0
-        self.update_score()
+        self.level_label.config(text='Level: ' + str(self.current_level) + ' - Difficulty: ' + self.difficulty[self.current_level])
+        self.user.reset_score()  # Reset score
+        self.update_score()  # Update score display
         self.restart_countdown()  # Start countdown for restart
 
     def clear(self):
@@ -356,15 +359,13 @@ class MathGame:
             if self.username_exists(username):
                 self.show_message('Username already exists. Please choose a different username.')
             else:
-                try:
-                    with open(_G, 'a') as file:
-                        file.write(f"{username}:{password}\n")  # Save username and password
-                    self.show_message('Account created successfully! Redirecting to welcome screen...')
-                    self.login_frame.pack_forget()
-                    self.create_widgets()  # Create widgets for the game
-                    self.show_splash_screen()  # Show splash screen
-                except Exception as e:
-                    self.show_message(f"Error creating account: {e}")
+                with open('credentials.txt', 'a') as file:
+                    file.write(f"{username}:{password}\n")  # Save username and password
+                self.user = User(username)  # Create User object
+                self.show_message('Account created successfully! Redirecting to welcome screen...')
+                self.login_box.pack_forget()
+                self.game_buttons()  # Create widgets for the game
+                self.splash_screen()  # Show splash screen
         else:
             self.show_message('Please enter both a username and password.')
 
@@ -373,36 +374,41 @@ class MathGame:
         username = self.username_entry.get().strip()
         password = self.password_entry.get().strip()
         if self.validate_credentials(username, password):
-            self.login_frame.pack_forget()
-            self.create_widgets()  # Create widgets for the game
-            self.show_splash_screen()  # Show splash screen
+            self.user = User(username)  # Create User object
+            self.login_box.pack_forget()
+            self.game_buttons()  # Create widgets for the game
+            self.splash_screen()  # Show splash screen
         else:
             self.show_message('Invalid login credentials. Please try again.')
 
     def username_exists(self, username):
         # Check if username already exists
-        if os.path.exists(_G):
-            with open(_G, 'r') as file:
+        if os.path.exists('credentials.txt'):
+            with open('credentials.txt', 'r') as file:
                 for line in file:
                     stored_username, _ = line.strip().split(':')
                     if username == stored_username:
-                        return _A  # Username exists
+                        return True  # Username exists
         return False  # Username does not exist
 
     def validate_credentials(self, username, password):
         # Validate username and password
-        if os.path.exists(_G):
-            with open(_G, 'r') as file:
+        if os.path.exists('credentials.txt'):
+            with open('credentials.txt', 'r') as file:
                 for line in file:
                     stored_username, stored_password = line.strip().split(':')
                     if username == stored_username and password == stored_password:
-                        return _A  # Credentials are valid
+                        return True  # Credentials are valid
         return False  # Invalid credentials
 
     def show_message(self, message):
         # Show a message box
         tk.messagebox.showinfo('Message', message)
 
-root = tk.Tk()
-game = MathGame(root)
-root.mainloop()
+def main():
+    root = tk.Tk()
+    game = NumberRush(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
