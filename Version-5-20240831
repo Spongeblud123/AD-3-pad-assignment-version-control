@@ -15,24 +15,24 @@ class User:  # Class for user
     """This class manages user-related info, such as their username and score."""
 
     def __init__(self, username):
-        """Initialise the self object."""
+        """Initialise the self attribute."""
         self.username = username  # Store the username
         self.score = 0  # Start the user with a score of zero
 
     def reset_score(self):
-        """This module helps reset the score."""
+        """Reset the score."""
         self.score = 0  # If needed, reset the score back to zero
-    
+
     def increment_score(self):
-        """This module helps increment the score."""
-        self.score += 1   # Increments score by +1
+        """Increment the score."""
+        self.score += 1  # Increments score by +1
 
 
 class NumberRush:
-    """This class handles the core game logic and the user interface (UI)."""
+    """This class handles the core game logic and the user interface."""
 
     def __init__(self, root):
-        """Initialise the self object."""
+        """Initialise the self attribute."""
         self.root = root  # Set up the main window
         self.root.title('Number Rush')  # Set the window title
         self.root.geometry('1000x700')  # Define the window size
@@ -50,55 +50,47 @@ class NumberRush:
         self.login_page()  # Show the login page to the user
 
     def game_buttons(self):
-        """This module creates the labels for all the game buttons."""
-        self.window_box = tk.Frame(self.root, bg='#e0f7fa')  # Sets up the gui with a light blue background
+        """Create the labels for all the game buttons and give them fonts."""
+        self.window_box = tk.Frame(self.root, bg='#e0f7fa')  # Sets up the GUI with a light blue background
         self.window_label = tk.Label(self.window_box, text=f'Welcome {self.user.username} to Number Rush!', font=self.title_text, bg='#e0f7fa', fg='navy blue')  # Welcome message for the user
         self.press_start = tk.Button(self.window_box, text='Press Play To Begin', font=self.button_font, bg='navy blue', fg='white', command=self.start_countdown)  # Makes the button to start the game
         self.window_label.pack(pady=30)  # Adds padding around button
         self.press_start.pack(pady=20)  # Adds padding around button
 
-        self.game_frame = tk.Frame(self.root, bg='#e0f7fa')  # Makes the gui have a light blue background
+        self.game_frame = tk.Frame(self.root, bg='#e0f7fa')  # Makes the GUI have a light blue background
         self.level_label = tk.Label(self.game_frame, text='Level: 1 - Difficulty: ' + self.difficulty[self.current_level], font=self.normal_font, bg='#e0f7fa', fg='navy blue')  # Makes the level label
         self.question_label = tk.Label(self.game_frame, text='', font=self.normal_font, bg='#e0f7fa', fg='navy blue')  # Makes the label for the question display
         self.invalid_input_label = tk.Label(self.game_frame, text='', fg='red', font=self.normal_font, bg='#e0f7fa')  # Shows the user if the input is invalid; makes the label for it
-        self.answer_entry = tk.Entry(self.game_frame, font=self.normal_font, bg='#ffffff', fg='black')  # Makes the asnwer entry box
+        self.answer_entry = tk.Entry(self.game_frame, font=self.normal_font, bg='#ffffff', fg='black')  # Makes the answer entry box
         self.press_submit = tk.Button(self.game_frame, text='Submit/Press Enter', font=self.button_font, bg='navy blue', fg='white', command=self.submit_answer)  # Makes the button to submit and the colours as well
         self.score_label = tk.Label(self.game_frame, text=f'Score: {self.user.score}/10', font=self.normal_font, bg='#e0f7fa', fg='navy blue')  # Shows the user score
         self.timer_label = tk.Label(self.game_frame, text='Time left: ' + str(self.time_limit), font=self.normal_font, bg='#e0f7fa', fg='navy blue')  # Shows how much time is left in the game
         self.continue_button = tk.Button(self.game_frame, text='Next Level', font=self.button_font, bg='#0288d1', fg='white', command=self.level_countdown)  # Makes the button for the next level
 
-        self.level_label.pack(pady=10)  # Adds spacing around label
-        self.question_label.pack(pady=10)  # Adds spacing around label
+        self.level_label.pack(pady=10)  # Organises on window and adds spacing between widgets around label
+        self.question_label.pack(pady=10)  # Organises on window and adds spacing between widgets around label
         self.invalid_input_label.pack_forget()  # Hides the error message label by default
-        self.answer_entry.pack(pady=10)  # Adds spacing
-        self.press_submit.pack(pady=15)  # Adds spacing
-        self.score_label.pack(pady=10)  # Adds spacing
-        self.timer_label.pack(pady=10)  # Adds spacing
+        self.answer_entry.pack(pady=10)  # Organises on window and adds spacing between widgets
+        self.press_submit.pack(pady=15)  # Organises on window and adds spacing between widgets
+        self.score_label.pack(pady=10)  # Organises on window and adds spacing between widgets
+        self.timer_label.pack(pady=10)  # Organises on window and adds spacing between widgets
         self.answer_entry.bind('<Return>', self.submit_answer_event)  # Let the user press Enter to submit their answer
 
         self.image = tk.PhotoImage(file='SpongeBob.png')  # Loads spongebob image from file
-        self.image_label = tk.Label(self.game_frame, image=self.image, bg='#e0f7fa')  # Creates the image
-        self.image_label.pack(side='bottom', pady=20)  # Places the image at the bottom of the screen
+        self.image_label = tk.Label(self.game_frame, image=self.image, bg='#e0f7fa')  # Creates the image label
+        self.image_label.pack(side='bottom', pady=20)  # Places the image at the bottom of the screen and with spacing
 
-        self.window()  # Shows window
-
-    def window(self):
-        """This module creates the window for the gui."""
-        self.window_box.pack(fill='both', expand=True)  # Makes the splash screen fill the window
-
-    def remove_window(self):
-        """This module removes the window for the gui when needed."""
-        self.window_box.pack_forget()
+        self.window_box.pack(fill='both', expand=True)
 
     def start_countdown(self):
-        """ This module starts the countdown."""
-        self.remove_window()  # Removes the splash screen
+        """Start the countdown."""
+        self.window_box.pack_forget()  # Removes the window screen
         self.countdown_label = tk.Label(self.root, text='', font=('Helvetica', 60, 'bold'), bg='#e0f7fa', fg='navy blue')  # Makes the label for the countdown
-        self.countdown_label.pack(fill='both', expand=True)
-        self.countdown(3)  # 3,2,1
+        self.countdown_label.pack(fill='both', expand=True)  # Packs the countdown label
+        self.countdown(3)  # Countdown from 3
 
     def countdown(self, count):
-        """This module defines the countdown."""
+        """Define the countdown."""
         if count > 0:  # Conditional statement for the countdown
             self.countdown_label.config(text=str(count))  # Makes the label configuration
             self.root.after(1000, self.countdown, count - 1)  # Countdown for 1000 milliseconds
@@ -107,7 +99,7 @@ class NumberRush:
             self.root.after(1000, self.start_game)  # Delay before the game starts
 
     def start_game(self):
-        """This module starts the game and makes the labels for when the game starts."""
+        """Start the game and make the labels for when the game starts."""
         self.countdown_label.pack_forget()  # Removes the countdown when the game starts
         self.game_frame.pack(fill='both', expand=True)  # Expands the game
         self.user.reset_score()  # Makes the users score reset
@@ -124,37 +116,34 @@ class NumberRush:
             self.image_label.pack(side='bottom', pady=20)  # Sets the image at the bottom of the screen
 
     def question_asker(self):
-        """This module makes sure when the user needs to be asked a math question."""
+        """Make sure when the user needs to be asked a math question."""
         if self.questions_left == 0 or self.user.score >= 10:  # Conditional statement if questions left 0 or score is 10
-            self.check_score_and_continue()  # Continue is statement is true
+            self.check_score_and_continue()  # Continue if statement is true
             return  # Returns into GUI
 
         self.questions_left -= 1  # Increments by -1
         self.question, self.correct_answer = self.question_gen()  # Makes correct answer = question
-        self.update_question()  # Updates question display
+        self.question_label.config(text=f'Question: {self.question}', fg='navy blue')  # Makes label and colours for question
+        self.invalid_input_label.pack_forget()  # Hide any previous error messages
         self.reset_input()  # Makes input state normal
 
-    def update_question(self):
-        """This module updates the question."""
-        self.question_label.config(text=f'Question: {self.question}', fg='navy blue')  # Makes label and colours for question
-        self.invalid_input_label.pack_forget()   # Hide any previous error messages
-
     def reset_input(self):
-        self.answer_entry.delete(0, tk.END)   # Clear input box
-        self.answer_entry.focus()   # Focus on the input box
+        """Reset the input for the answer entry."""
+        self.answer_entry.delete(0, tk.END)  # Clear input box
+        self.answer_entry.focus()  # Focus on the input box
         self.answer_entry.config(state=tk.NORMAL)  # Makes entry normal
         self.press_submit.config(state=tk.NORMAL)  # Makes entry normal
-        self.answer_entry.bind('<Return>', self.submit_answer_event)   # Allow pressing Enter to submit
+        self.answer_entry.bind('<Return>', self.submit_answer_event)  # Allow pressing Enter to submit
 
 
     def submit_answer_event(self, event):
-        """This module makes sure that the answer can be submitted."""
+        """Make sure that the answer can be submitted."""
         self.submit_answer()  # Call the submit answer method
 
     def submit_answer(self):
-        """This module creates the functions for submitting the answer."""
+        """Create the functions for submitting the answer."""
         user_answer = self.answer_entry.get()  # Get the answer from the input box
-        self.clear()  # Clear the input box
+        self.answer_entry.delete(0, tk.END)  # Remove any text from the input box
         self.answer_entry.config(state=tk.DISABLED)  # Disable the input box to prevent more entries
         self.press_submit.config(state=tk.DISABLED)  # Disable the submit button
         self.answer_entry.unbind('<Return>')  # Unbind the Enter key
@@ -182,11 +171,11 @@ class NumberRush:
             self.root.after(500, self.question_asker)  # Wait half a second before asking the next question
 
     def update_score(self):
-        """This module creates the score label."""
+        """Create the score label."""
         self.score_label.config(text=f'Score: {self.user.score}/10')  # Update the label with the user's score
 
     def update_timer(self):
-        """This module updates the timer."""
+        """Update the timer."""
         if self.time_limit > 0:  # If there's still time left
             self.timer_label.config(text='Time left: ' + str(self.time_limit))  # Update the time display
             self.time_limit -= 1  # Decrease the time by 1 second
@@ -196,7 +185,7 @@ class NumberRush:
             self.check_score_and_continue()  # Move on to the next step
 
     def check_score_and_continue(self):
-        """This module checks the score to see if the user can continue to the next level or not."""
+        """Check the score to see if the user can continue to the next level or not."""
         self.answer_entry.config(state=tk.DISABLED)  # Disable the answer box
         self.press_submit.config(state=tk.DISABLED)  # Disable the submit button
         self.answer_entry.unbind('<Return>')  # Unbind the Enter key
@@ -209,7 +198,7 @@ class NumberRush:
             self.level_failed()  # Handle level failure
 
     def level_countdown(self):
-        """This module creates the level countdown before each level."""
+        """Create the level countdown before each level."""
         if hasattr(self, 'welcome_back_frame') and self.welcome_back_frame.winfo_ismapped():  # If the welcome back frame is visible
             self.welcome_back_frame.pack_forget()  # Hide it
         self.current_level += 1  # Move to the next level
@@ -228,7 +217,7 @@ class NumberRush:
         self.continue_button.pack_forget()  # Hide the continue button
 
     def continue_level(self):
-        """This module creates the label for continuing the level, and controls the entry state."""
+        """Create the label for continuing the level, and control the entry state."""
         self.question_label.config(fg='navy blue', text=f"Congratulations! You've completed Level {self.current_level}.")  # Congratulate the user
         self.answer_entry.config(state=tk.DISABLED)  # Disable the input box
         self.press_submit.config(state=tk.DISABLED)  # Disable the submit button
@@ -236,7 +225,7 @@ class NumberRush:
         self.continue_button.pack(pady=20)  # Show the continue button with some padding
 
     def offer_restart(self):
-        """This module creates the label for restarting the level, and controls the entry state."""
+        """Create the label for restarting the level, and control the entry state."""
         self.question_label.config(fg='navy blue', text="Congratulations! You've completed all levels!")  # Congratulate the user
         self.answer_entry.config(state=tk.DISABLED)  # Disable the input box
         self.press_submit.config(state=tk.DISABLED)  # Disable the submit button
@@ -245,7 +234,7 @@ class NumberRush:
         self.restart_button.pack(pady=20)  # Show the restart button with some padding
 
     def level_failed(self):
-        """This module creates the label for failing the level, and controls the entry state."""
+        """Create the label for failing the level, and control the entry state."""
         self.question_label.config(fg='red', text=f"Level {self.current_level} Failed! You needed 10 points.")  # Display a failure message
         self.answer_entry.config(state=tk.DISABLED)  # Disable the input box
         self.press_submit.config(state=tk.DISABLED)  # Disable the submit button
@@ -254,75 +243,70 @@ class NumberRush:
         self.retry_button.pack(pady=20)  # Show the retry button with some padding
 
     def retry_countdown(self):
-        """This module creates the retry countdown."""
+        """Create the retry countdown."""
         self.retry_button.pack_forget()  # Hide the retry button
+        self.image_label.pack_forget()  # Hide the image temporarily
         self.countdown_label = tk.Label(self.root, text='', font=('Helvetica', 60, 'bold'), bg='#e0f7fa', fg='navy blue')  # Create a label for the countdown
         self.countdown_label.pack(fill='both', expand=True)  # Expand the countdown label to fill the window
         self.countdown(3)  # Start the countdown from 3 seconds
 
     def restart_countdown(self):
-        """This module creates the restart countdown."""
+        """Create the restart countdown."""
         self.restart_button.pack_forget()  # Hide the restart button
         self.countdown_label = tk.Label(self.root, text='', font=('Helvetica', 60, 'bold'), bg='#e0f7fa', fg='navy blue')  # Create a label for the countdown
         self.countdown_label.pack(fill='both', expand=True)  # Expand the countdown label to fill the window
         self.countdown(3)  # Start the countdown from 3 seconds
 
     def restart_game(self):
-        """This module updates the game when restarting."""
+        """Update the game when restarting."""
         self.current_level = 1  # Reset the level to the first one
         self.level_label.config(text='Level: ' + str(self.current_level) + ' - Difficulty: ' + self.difficulty[self.current_level])  # Update the level display
         self.user.reset_score()  # Reset the user's score
         self.update_score()  # Update the score display
         self.restart_countdown()  # Start the countdown for restarting the game
 
-    def clear(self):
-        """This module clears the answer after each input."""
-
-        self.answer_entry.delete(0, tk.END)  # Remove any text from the input box
 
     def login_page(self):
-        """This module creates the login pages labels and design."""
+        """Create the login pages labels and design."""
         self.login_window = tk.Frame(self.root, bg='#e0f7fa')  # Makes the login box
         self.login_title = tk.Label(self.login_window, text='Welcome, please login', font=self.title_text, bg='#e0f7fa', fg='navy blue')  # Shows the title
         self.username_label = tk.Label(self.login_window, text='Username:', font=self.normal_font, bg='#e0f7fa', fg='navy blue')  # Makes the label for the username
-        self.username_entry = tk.Entry(self.login_window, font=self.normal_font)  # Makes the entry possible for the usernsme
+        self.username_entry = tk.Entry(self.login_window, font=self.normal_font)  # Makes the entry possible for the username
         self.password_label = tk.Label(self.login_window, text='Password:', font=self.normal_font, bg='#e0f7fa', fg='navy blue')  # Makes the label for the password
         self.password_entry = tk.Entry(self.login_window, show='*', font=self.normal_font)  # Makes the entry possible for the password and makes sure to hide the password
         self.login_button = tk.Button(self.login_window, text='Login', font=self.button_font, bg='navy blue', fg='white', command=self.login)  # Makes the login button
         self.create_account_button = tk.Button(self.login_window, text='Create Account', font=self.button_font, bg='#0288d1', fg='white', command=self.create_account)  # Makes the create account button
 
-        self.login_title.pack(pady=20)  # Adds spacing around buttons
-        self.username_label.pack(pady=5)  # Adds spacing around buttons
-        self.username_entry.pack(pady=5)  # Adds spacing around buttons
-        self.password_label.pack(pady=5)  # Adds spacing around buttons
-        self.password_entry.pack(pady=5)  # Adds spacing around buttons
-        self.login_button.pack(pady=10)  # Adds spacing around buttons
-        self.create_account_button.pack(pady=10)  # Adds spacing around buttons
+        self.login_title.pack(pady=20)  # Organises on window and adds spacing between widgets around buttons
+        self.username_label.pack(pady=5)  # Organises on window and adds spacing between widgets around buttons
+        self.username_entry.pack(pady=5)  # Organises on window and adds spacing between widgets around buttons
+        self.password_label.pack(pady=5)  # Organises on window and adds spacing between widgets around buttons
+        self.password_entry.pack(pady=5)  # Organises on window and adds spacing between widgets around buttons
+        self.login_button.pack(pady=10)  # Organises on window and adds spacing between widgets around buttons
+        self.create_account_button.pack(pady=10)  # Organises on window and adds spacing between widgets around buttons
         self.login_window.pack(fill='both', expand=True)  # Make the login box fill the window
 
     def create_account(self):
-        """This module creates the create account function and makes sure it handles errors accordingly."""
+        """Create the create account function and make sure it handles errors accordingly."""
         username = self.username_entry.get().strip()  # Get the username input
         password = self.password_entry.get().strip()  # Get the password input
         if username and password:  # If both fields are filled
             if self.user_taken(username):  # Check if the username already exists
                 self.show_message('Username already exists. Please choose a different username.')  # Notify the user if the username is taken
             else:  # If the username is available
-                try:  # Try to save the new account
-                    with open('credentials.txt', 'a') as file:  # Open the credentials file in append mode
-                        file.write(f"{username}:{password}\n")  # Save the username and password
-                    self.user = User(username)  # Create a new user object
-                    self.show_message('Account created successfully! Redirecting to welcome screen...')  # Notify the user of success
-                    self.login_window.pack_forget()  # Hide the login box
-                    self.game_buttons()  # Show the game buttons
-                    self.window()  # Show the splash screen
-                except IOError:  # If there's an error saving the account
-                    self.show_message('Error saving account. Please try again later.', title="File Error")  # Notify the user of the error
+                with open('credentials.txt', 'a') as file:  # Open the credentials file in append mode
+                    file.write(f"{username}:{password}\n")  # Save the username and password
+                self.user = User(username)  # Create a new user object
+                self.show_message('Account created successfully! Redirecting to welcome screen...')  # Notify the user of success
+                self.login_window.pack_forget()  # Hide the login box
+                self.game_buttons()  # Show the game buttons
+                self.window_box.pack(fill='both', expand=True) # Show the window screen
+                
         else:  # If either field is empty
             self.show_message('Please enter both a username and password.')  # Prompt the user to fill in both fields
 
     def login(self):
-        """This module helps create the login function."""
+        """Help create the login function."""
         username = self.username_entry.get().strip()  # Get the username input
         password = self.password_entry.get().strip()  # Get the password input
         if self.valid_info(username, password):  # Validate the credentials
@@ -330,12 +314,12 @@ class NumberRush:
             self.show_message("Login successful! Welcome back, " + username)  # Notify the user of a successful login
             self.login_window.pack_forget()  # Hide the login box
             self.game_buttons()  # Show the game buttons
-            self.window()  # Show the splash screen
+            self.window_box.pack(fill='both', expand=True) # Show the window screen
         else:  # If the credentials are invalid
             self.show_message('Invalid login credentials. Please try again.')  # Notify the user of the failure
 
     def user_taken(self, username):
-        """This module makes sure that the user is taken or not and helps create the create account function."""
+        """Identify if username is taken or not and help create the create account function."""
         if os.path.exists('credentials.txt'):  # If the file exists
             with open('credentials.txt', 'r') as file:  # Open the file in read mode
                 for line in file:  # Check each line
@@ -345,7 +329,7 @@ class NumberRush:
         return False  # Username doesn't exist
 
     def valid_info(self, username, password):
-        """This module validates the users info."""
+        """Validate the users info."""
         if os.path.exists('credentials.txt'):  # If the file exists
             with open('credentials.txt', 'r') as file:  # Open the file in read mode
                 for line in file:  # Check each line
@@ -355,11 +339,11 @@ class NumberRush:
         return False  # Credentials are invalid
 
     def show_message(self, message):
-        """This module makes the message box and message."""
+        """Make the message box and message."""
         tk.messagebox.showinfo('Message', message)  # Show the message in a message box
-
+   
     def question_gen(self):
-        """This module makes the question generator and is responsible for the difficulty progression."""
+        """Make the question generator and the difficulty progression."""
         x, y, operator = 0, 0, ''  # Initally makes x and y nothing and no operator present
 
         if self.current_level == 1:  # Conditional statement if the level is 1
@@ -381,11 +365,11 @@ class NumberRush:
             operator = random.choice(['+', '-', '*', '/'])  # Program selects randomly between operators
             if operator == '/':
                 y = random.randint(5, 50)
-                x = y * random.randint(1, 15)   # Ensure clean division
+                x = y * random.randint(1, 15)  # Ensure clean division
             elif operator == '*':  # Conditional statement if operator is times
                 x, y = random.randint(10, 20), random.randint(10, 20)
             else:
-                x, y = sorted((random.randint(20, 75), random.randint(20, 75)), reverse=True)   # Sorts x and y into descending order to avoid a negative answer, and makes x and y a random number between 20 to 75
+                x, y = sorted((random.randint(20, 75), random.randint(20, 75)), reverse=True)  # Sorts x and y into descending order to avoid a negative answer, and makes x and y a random number between 20 to 75
 
         elif self.current_level == 5:  # Conditional statement if the level is 5
             operator = random.choice(['+', '-', '*', '/'])  # Program selects randomly between operators
@@ -395,14 +379,13 @@ class NumberRush:
             elif operator == '*':  # Conditional statement if operator is times
                 x, y = random.randint(15, 25), random.randint(15, 25)  # Makes x and y a random operator between 15 and 25
             else:
-                x, y = sorted((random.randint(50, 100), random.randint(20, 100)), reverse=True)    # Sorts x and y into descending order to avoid a negative answer and gives x and y random values
+                x, y = sorted((random.randint(50, 100), random.randint(20, 100)), reverse=True)  # Sorts x and y into descending order to avoid a negative answer and gives x and y random values
 
         answer = eval(f"{x} {operator} {y}")  # Shows user the format
         return f"{x} {operator} {y}", round(answer, 2)  # Shows user the format
 
-
 def main():
-    """This module runs the main window and makes the gui actually work."""
+    """Run the main window and loop the GUI."""
     root = tk.Tk()  # Create the main window
     game = NumberRush(root)  # Create a game object
     root.mainloop()  # Start the Tkinter event loop
